@@ -8,9 +8,10 @@ display_width = 400
 white = (255, 255, 255)
 black = (0, 0, 0)
 
-gameBoard = pygame.image.load('Images/gameBoardBG.png')
-gameBoard = pygame.transform.smoothscale(
-    gameBoard, (display_height, display_width))
+gameBoardFileLocations = 'Images'
+gameBoard_basic = (gameBoardFileLocations + '/gameBoardBG.png')
+gameBoard_in_use = pygame.image.load(gameBoard_basic)
+gameBoard_in_use = pygame.transform.smoothscale(gameBoard_in_use, (display_height, display_width))
 
 robotSize = (int(display_height / 12), int(display_width / 12))
 
@@ -30,6 +31,32 @@ gameDisplay = pygame.display.set_mode((display_height, display_width))
 pygame.display.set_caption("RoboRally")
 
 clock = pygame.time.Clock()
+
+
+class game_board():
+    # game board needs:
+        # waypoint amount
+        # waypoint locations
+        # waypoint order
+    def __init__(self):
+        self.waypoint_amount = amount
+        self.waypoint_location = location  # This will be a list of coords and will be in the order of the race
+
+
+class users():
+    # users need:
+        # robot
+        # location
+        # direction
+        # health
+        # current waypoint player is on
+
+    def __init__(self, robot, location, directionFacing):
+        self.robot = robot
+        self.health = 100
+        self.location = location
+        self.directionFacing = directionFacing
+        #self.current_waypoint = starting_waypoint
 
 
 def waitForInput():
@@ -79,24 +106,44 @@ def message_display(message, location, color):
 
 def buildNewGame():
     print("new game")
+    info_string = []
+
+    # FILE NAME
     message = "Name of game?"
     message_location = ((display_width / 2), (display_height / 2))
     message_display(message, message_location, black)
     waitForInput()
-    nameOfGame = userInput
-    print(nameOfGame)
+    nameOfGame = userInput + ".py"
     message_display(message, message_location, white)
 
-    message = "How many players?"
-    message_location = ((display_width / 2), (display_height / 2))
+    # NAME OF GAMEBOARD
+    message = "What gameBoard to use? (1)"
     message_display(message, message_location, black)
     waitForInput()
-    amountOfPlayers = userInput
-    print(amountOfPlayers)
+    if userInput == '1':
+        gameboard = gameBoard_basic
     message_display(message, message_location, white)
+    info_string.append(gameboard)
+    print(gameboard)
+
+    # QUANTITY OF PLAYERS
+    message = "How many players?"
+    message_display(message, message_location, black)
+    waitForInput()
+    amountOfPlayers = int(userInput) - 1
+    message_display(message, message_location, white)
+    startingLocation = (0, 0)
+    for num in int(amountOfPlayers):
+        users(1, (0, 0), 'north')
+        print(amountOfPlayers[num])
+        # info_string.append(user[num].robot)
+
+    newGame = open(nameOfGame, "w")
+    newGame.write(str(info_string))
 
 
 def mainMenu():
+    print(gameBoard_basic)
     message = """
     1. Load a Game
     2. Start a new game
@@ -108,6 +155,8 @@ def mainMenu():
     if userInput == '1':
         # TODO: make this go and load a game
         print("Go to loading screen")
+        gameRun = True
+        gameLoop(gameRun)
 
     elif userInput == '2':
         message_display(message, message_location, white)
@@ -128,7 +177,7 @@ def gameLoop(gameRun):
         if not gameRun:
             mainMenu()
 
-        gameDisplay.blit(gameBoard, (0, 0))
+        gameDisplay.blit(gameBoard_in_use, (0, 0))
 
         pygame.display.update()
         clock.tick(60)
