@@ -14,16 +14,6 @@ display_width = 800
 white = (255, 255, 255)
 black = (0, 0, 0)
 
-# gameBoardFileLocations = 'Images/GameBoards'
-# gameBoard_basic = (gameBoardFileLocations + '/BasicBoard.png')
-# gameBoard_in_use = pygame.image.load(gameBoard_basic)
-# robot1 = pygame.image.load('Images/Robots/ScissorHand.png')
-
-gameboard = "empty.png"
-gameboard_path = f"Images/GameBoards/{gameboard}"
-active_boardgame = pygame.image.load(gameboard_path)
-gameBoard_in_use = pygame.transform.smoothscale(active_boardgame, (display_height, display_width))
-
 robotSize = (int(display_height / 12), int(display_width / 12))
 
 robot1 = pygame.image.load('Images/Robots/ScissorHand.png')
@@ -105,7 +95,12 @@ savedGame_path = '/SavedGames'
 
 
 def loadGame():
-    global gameboard
+    global gameBoard_in_use
+    global number_of_players
+    global players_info
+    global player
+
+    players_info = {}
 
     games_available = os.listdir('SavedGames')
     message = f"the games available to load are {games_available}"
@@ -116,19 +111,59 @@ def loadGame():
             savedGame_path + '/' + games_available[int(userInput) - 1]
         file = open(game_to_load, 'r')
         line = file.read().splitlines()
+        last_line = line[-1]
+        player_info = line[1]
+
         # load the board
         gameboard = line[0]
-        print(gameboard_path, gameboard)
-        gameRun = True
-        gameLoop(gameRun)
+        gameboard_path = f"Images/GameBoards/{gameboard}"
+        active_boardgame = pygame.image.load(gameboard_path)
+        gameBoard_in_use = pygame.transform.smoothscale(
+            active_boardgame, (display_height, display_width))
+
+        # Load the players names
+        word = ""
+        player_num = 1
+
+        for letter_in_player_info in player_info:
+            if letter_in_player_info == " " or letter_in_player_info == "<":
+                if word[0].isalpha() == True:
+                    players_info['player' + str(player_num)
+                                 ] = {'name': word, 'robot': 'robot'+str(player_num)}
+                word = ""
+                player_num += 1
+            else:
+                word += letter_in_player_info
+        print(players_info.items())
 
         # read the last move
+        count = 0
+        while count >= 0:
+            count = last_line.find("player", count + 1)
+            if count != -1:
+                plr_num = last_line[count + 6]
 
-        # last_line = line[-1]
-        # print(last_line)
+                plr_coord_x1 = last_line.find("X", count)+2
+                plr_coord_x2 = last_line.find("X", count)+3
+                plr_coord_y1 = last_line.find("Y", count)+2
+                plr_coord_y2 = last_line.find("Y", count)+3
+                plr_coord = last_line[plr_coord_x1] + last_line[plr_coord_x2] + "," + \
+                    last_line[plr_coord_y1] + last_line[plr_coord_y2]
+                players_info.get('player' + plr_num).update({'coords': plr_coord})
+
+                plr_direction_loction_start = last_line.find("D:", count)+2
+                plr_direction_loction_end = last_line.find(" " or "<", plr_direction_loction_start)
+                plr_direction = last_line[plr_direction_loction_start:plr_direction_loction_end]
+                players_info.get('player' + plr_num).update({'direction': plr_direction})
+
+                print(players_info.get('player' + plr_num).values())
+
         # message_display(message, message_center, white)
         # message_display(last_line, message_center, black)
         # waitForInput()
+
+        game_loaded = True
+        gameLoop(game_loaded)
 # ************************************ Menus ************************************
 
 
@@ -147,12 +182,12 @@ def mainMenu():
 
     elif userInput == '2':
         message_display(message, message_location, white)
-        buildNewGame()
+        # buildNewGame()
 
 
-# **************************** Game Loop ****************************************
+# **************************** Game Loop ***************************************
 
-def gameLoop(gameRun):
+def gameLoop(game_loaded):
     gameExit = False
 
     while not gameExit:
@@ -163,7 +198,7 @@ def gameLoop(gameRun):
 
         gameDisplay.fill(white)
 
-        if not gameRun:
+        if not game_loaded:
             mainMenu()
 
         gameDisplay.blit(gameBoard_in_use, (0, 0))
@@ -172,7 +207,7 @@ def gameLoop(gameRun):
         clock.tick(60)
 
 
-gameRun = False
-gameLoop(gameRun)
+game_loaded = False
+gameLoop(game_loaded)
 pygame.quit()
 quit()

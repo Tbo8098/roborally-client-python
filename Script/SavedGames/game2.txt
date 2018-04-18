@@ -1,1 +1,6 @@
 BasicBoard.png
+player1 = robot1
+player2 = robot2
+
+
+| player1 7 8 north 100 | player2 55 3 2 south
