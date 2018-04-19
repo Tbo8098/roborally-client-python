@@ -3,5 +3,8 @@ tyler curtis<
 
 start
 >player1 X:12 Y:1 D:north player2 X:12 Y:12 D:south<
->player1 X:7 Y:8 D:north player2 X:12 Y:5 D:south<
->player1 X:1 Y:1 D:north player2 X:9 Y:2 D:south<
+>player1 X:12 Y:2 D:north player2 X:12 Y:12 D:south<
+>player1 X:12 Y:3 D:north player2 X:12 Y:12 D:south<
+>player1 X:12 Y:4 D:north player2 X:12 Y:12 D:south<
+>player1 X:12 Y:5 D:north player2 X:12 Y:12 D:south<
+>player1 X:12 Y:6 D:north player2 X:12 Y:12 D:south<

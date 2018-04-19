@@ -141,7 +141,6 @@ def loadGame():
 
 
 def loadLine(line2read):
-    global game_loaded
     file = open(game_loaded, 'r')
     line = file.read().splitlines()
     move = line[line2read]
@@ -162,7 +161,7 @@ def loadLine(line2read):
             plr_coord_y = move[plr_coord_y_start:plr_coord_y_end]
             print(f"x coord: {plr_coord_x} and y coord: {plr_coord_y}")
 
-            plr_coord = [plr_coord_y, plr_coord_x]
+            plr_coord = [plr_coord_x, plr_coord_y]
             players_info.get('player' + plr_num).update({'coords': plr_coord})
 
             plr_direction_loction_start = move.find("D:", count)+2
@@ -180,10 +179,14 @@ def navigate():
     global line2read
     printOnScreen = False
     userInput = waitForInput(printOnScreen)
+
     if userInput == 'up':
         line2read = line2read - 1
-        print(line2read)
         loadLine(line2read)
+    elif userInput == 'down':
+        line2read = line2read + 1
+        loadLine(line2read)
+
 
 
 def draw_to_board():
