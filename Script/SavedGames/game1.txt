@@ -1,4 +1,7 @@
 BasicBoard2.png
 tyler curtis<
 
->player1 X:07 Y:08 D:north | player2 X:12 Y:05 D:south<
+start
+>player1 X:12 Y:1 D:north player2 X:12 Y:12 D:south<
+>player1 X:7 Y:8 D:north player2 X:12 Y:5 D:south<
+>player1 X:1 Y:1 D:north player2 X:9 Y:2 D:south<
