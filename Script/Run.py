@@ -49,27 +49,31 @@ def waitForInput(printOnScreen):
 
             if event.type == pygame.KEYDOWN:
                 key = pygame.key.name(event.key)
-                if key == 'return' or key == 'backspace':
-                    message = userInput
-                    message_location = ((display_width / 2), (display_height / 1.5))
-                    message_display(message, message_location, white)
+                if printOnScreen is True:
+                    if key == 'return' or key == 'backspace':
+                        message = userInput
+                        message_location = ((display_width / 2), (display_height / 1.5))
+                        message_display(message, message_location, white)
 
-                    if key == 'return':
-                        return userInput
+                        if key == 'return':
+                            return userInput
+                        else:
+                            userInput = ""
+                            print("input cleared")
+
+                    elif key == 'space':
+                        userInput += " "
+                    elif key == 'right shift' or key == 'left shift':
+                        '''do nothing'''  # This is so the shift keys don't get inputted into the userInput
                     else:
-                        userInput = ""
-                        print("input cleared")
-
-                elif key == 'space':
-                    userInput += " "
-                elif key == 'right shift' or key == 'left shift':
-                    '''do nothing'''  # This is so the shift keys don't get inputted into the userInput
-                else:
-                    userInput += key
-                    if printOnScreen is True:
+                        userInput += key
                         message = userInput
                         message_location = ((display_width / 2), (display_height / 1.5))
                         message_display(message, message_location, black)
+                else:
+                    if key == 'up' or key == 'down':
+                        userInput = key
+                        return userInput
 
 
 def message_display(message, location, color):
@@ -202,6 +206,14 @@ def draw_to_board():
         coords_x = (int(coords[0]) - 1) * squareSizeX
         coords_y = (int(coords[1]) - 1) * squareSizeY
         direction = players_info.get('player' + str(index + 1)).get('direction')
+        if direction == 'north':
+            robot_actual = pygame.transform.rotate(robot_actual, 0)
+        elif direction == 'east':
+            robot_actual = pygame.transform.rotate(robot_actual, 90)
+        elif direction == 'south':
+            robot_actual = pygame.transform.rotate(robot_actual, 180)
+        elif direction == 'west':
+            robot_actual = pygame.transform.rotate(robot_actual, 270)
 
         gameDisplay.blit(robot_actual, (coords_x, coords_y))
     pygame.display.update()
