@@ -1,6 +1,7 @@
 import pygame
 import socket
 import os
+import json
 
 # ******************************************************************************
 # **************************inital setup****************************************
@@ -93,6 +94,42 @@ def message_display(message, location, color):
 gameBoard_path = '/Images/GameBoards'
 robots_path = '/Images/Robots'
 savedGame_path = '/SavedGames'
+
+
+def loadJson():
+    global gameBoard_in_use
+    global number_of_players
+    global players_info
+    global game_loaded
+
+    games_available = os.listdir('Script/SavedGames')
+    message = f"the games available to load are {games_available}"
+    message_display(message, message_center, black)
+    printOnScreen = True
+    userInput = waitForInput(printOnScreen)
+    if userInput.isnumeric() is True:
+        game_loaded = 'C:/Users/Spectre/Documents/Programming/roborally-client-python/Script' + \
+            savedGame_path + '/' + games_available[int(userInput) - 1]
+        file = open(game_loaded, 'r')
+        gamefile = json.load(file)
+        file.close()
+
+        gameboard = gamefile["gameBoard_in_use"] 
+        gameboard_path = f"Script/Images/GameBoards/{gameboard}"
+        active_boardgame = pygame.image.load(gameboard_path)
+        gameBoard_in_use = pygame.transform.smoothscale(
+            active_boardgame, (display_height, display_width))
+
+        number_of_players = gamefile["number_of_players"]
+        players_info = gamefile["players_info"]
+
+        print(gamefile["gameBoard_in_use"])
+
+def makeJson():
+    loadGame()
+    newfile = open("Script/SavedGames/game3.txt", 'w')
+    json.dump(players_info, newfile)
+    print(players_info)
 
 
 def loadGame():
@@ -224,13 +261,16 @@ def draw_to_board():
 
 def mainMenu():
     message = """
-    1. Load a Game
-    2. Start a new game
+    1. Load a Game \n
+    2. Start a new game \n 
+    3. make Json
+    4. load Json
     """
     message_location = ((display_width / 2), (display_height / 2))
     message_display(message, message_location, black)
     printOnScreen = True
     userInput = waitForInput(printOnScreen)
+    message_display(message, message_location, white)
 
     if userInput == '1':
         # TODO: make this go and load a game
@@ -239,6 +279,16 @@ def mainMenu():
     elif userInput == '2':
         message_display(message, message_location, white)
         # buildNewGame()
+
+    elif userInput == '3':
+        # make json
+        makeJson()
+
+    elif userInput == '4':
+        loadJson()
+    
+    else:
+        """do nothing"""
     
     return True
 
