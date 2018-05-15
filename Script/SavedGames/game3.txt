@@ -1,9 +1,0 @@
-{
-    "gameBoard_in_use" : "BasicBoard2.png",
-    "number_of_players" : 2,
-    "players_info" : {
-        "player1": {"name": "tyler", "robot": "robot1", "coords": ["12", "6"], "direction": "south"}, 
-
-        "player2": {"name": "curtis", "robot": "robot2", "coords": ["9", "10"], "direction": "south"}
-    }
-}

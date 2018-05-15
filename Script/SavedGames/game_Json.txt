@@ -1,0 +1,25 @@
+{
+    "gameBoard_in_use" : "BasicBoard2.png",
+    "number_of_players" : 2,
+
+    "turns": [
+        [
+            {
+                "name": "tyler",
+                "robot": "robot1", 
+                "coords": ["3", "6"], 
+                "direction": "north",
+                "activated_cards": [],
+                "cards_in_hand": [
+                    ['move forward x2', 175], ['aboutface', 255], ['move forward x2', 153], ['move forward x2', 163], ['aboutface', 295], ['turn left', 205], ['move forward', 143], ['turn left', 221], ['turn left', 200]
+                    ]
+            },
+            {
+                "name": "curtis",
+                "robot": "robot2", 
+                "coords": ["11", "10"], 
+                "direction": "east"
+            }
+        ]
+    ]
+}

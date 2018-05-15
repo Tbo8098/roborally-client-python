@@ -2,6 +2,7 @@ import pygame
 import socket
 import os
 import json
+from itemDescription import *
 
 # ******************************************************************************
 # **************************inital setup****************************************
@@ -9,20 +10,36 @@ import json
 
 pygame.init()
 
-display_height = 800
-display_width = 800
+display_height = 1000
+display_width = 1000
+
+gameboard_height = 800
+gameboard_width = 800
+
+gameboard_starting_location = (7,7)
+
+bgPath = "Script/Images"
+gameBackground = pygame.image.load(f"{bgPath}/roborallybackground.png")
 
 white = (255, 255, 255)
 black = (0, 0, 0)
 
-robotSize = (int(display_height / 12), int(display_width / 12))
+robotSize = (int(gameboard_height / 12), int(gameboard_width / 12))
 
 robot1 = 'ScissorHand.png'
 
 line2read = -1
 
-squareSizeX = display_width / 12
-squareSizeY = display_height / 12
+squareSizeX = (gameboard_width + gameboard_starting_location[0]) / 12
+squareSizeY = (gameboard_height + gameboard_starting_location[1]) / 12
+print(squareSizeX, squareSizeY)
+
+NESW = {
+    'north': 0,
+    'east': 90,
+    'south': 180,
+    'west': 270
+}
 
 SquareLocation = (6, 6)
 location = SquareLocation[0] * squareSizeX, SquareLocation[1] * squareSizeY
@@ -72,9 +89,7 @@ def waitForInput(printOnScreen):
                         message_location = ((display_width / 2), (display_height / 1.5))
                         message_display(message, message_location, black)
                 else:
-                    if key == 'up' or key == 'down':
-                        userInput = key
-                        return userInput
+                    return key
 
 
 def message_display(message, location, color):
@@ -86,10 +101,37 @@ def message_display(message, location, color):
     gameDisplay.blit(text, textRec)
     pygame.display.update()
 
-# *************************** New Game ******************************************
+
+def navigate():
+    global turn_number
+    global players_info
+
+    amount_of_turns = len(gamefile["turns"])
+
+    print(amount_of_turns)
+    userInput = waitForInput(False)
+    if userInput == 'right':
+        if turn_number < -1:
+            turn_number += 1
+            players_info = gamefile["turns"][turn_number]
+
+    elif userInput == 'left':
+        if turn_number > amount_of_turns - (amount_of_turns*2):
+            turn_number -= 1
+            players_info = gamefile["turns"][turn_number]
+ 
+    else:
+        print("not up or down")
+
+    print(players_info)
+    draw_to_board()
+
+
+
+# *************************** New Game *****************************************
 
 # ************************************ Load ************************************
-
+ 
 
 gameBoard_path = '/Images/GameBoards'
 robots_path = '/Images/Robots'
@@ -101,29 +143,30 @@ def loadJson():
     global number_of_players
     global players_info
     global game_loaded
-
+    global turn_number
+    global gamefile
+    
     games_available = os.listdir('Script/SavedGames')
     message = f"the games available to load are {games_available}"
     message_display(message, message_center, black)
     printOnScreen = True
     userInput = waitForInput(printOnScreen)
     if userInput.isnumeric() is True:
-        game_loaded = 'C:/Users/Spectre/Documents/Programming/roborally-client-python/Script' + \
+        game_loaded =  'C:/Users/Spectre/Documents/Programming/roborally-client-python/Script' + \
             savedGame_path + '/' + games_available[int(userInput) - 1]
         file = open(game_loaded, 'r')
         gamefile = json.load(file)
         file.close()
 
-        gameboard = gamefile["gameBoard_in_use"] 
+        gameboard = gamefile["gameBoard_in_use"]
         gameboard_path = f"Script/Images/GameBoards/{gameboard}"
         active_boardgame = pygame.image.load(gameboard_path)
         gameBoard_in_use = pygame.transform.smoothscale(
-            active_boardgame, (display_height, display_width))
+            active_boardgame, (gameboard_height, gameboard_width))
 
+        turn_number = -1
         number_of_players = gamefile["number_of_players"]
-        players_info = gamefile["players_info"]
-
-        print(gamefile["gameBoard_in_use"])
+        players_info = gamefile["turns"][turn_number]
 
 def makeJson():
     loadGame()
@@ -132,125 +175,21 @@ def makeJson():
     print(players_info)
 
 
-def loadGame():
-    global gameBoard_in_use
-    global number_of_players
-    global players_info
-    global game_loaded
-
-    players_info = {}
-
-    games_available = os.listdir('Script/SavedGames')
-    message = f"the games available to load are {games_available}"
-    message_display(message, message_center, black)
-    printOnScreen = True
-    userInput = waitForInput(printOnScreen)
-    if userInput.isnumeric() == True:
-        game_loaded = 'C:/Users/Spectre/Documents/Programming/roborally-client-python/Script' + \
-            savedGame_path + '/' + games_available[int(userInput) - 1]
-        file = open(game_loaded, 'r')
-        line = file.read().splitlines()
-        last_line = line[-1]
-        player_info = line[1]
-
-        # load the board
-        gameboard = line[0]
-        gameboard_path = f"Script/Images/GameBoards/{gameboard}"
-        active_boardgame = pygame.image.load(gameboard_path)
-        gameBoard_in_use = pygame.transform.smoothscale(
-            active_boardgame, (display_height, display_width))
-
-        # Load the players names
-        word = ""
-        player_num = 1
-
-        for letter_in_player_info in player_info:
-            if letter_in_player_info == " " or letter_in_player_info == "<":
-                if word[0].isalpha() == True:
-                    players_info['player' + str(player_num)
-                                 ] = {'name': word, 'robot': 'robot'+str(player_num)}
-                    number_of_players = player_num
-                word = ""
-                player_num += 1
-            else:
-                word += letter_in_player_info
-        print(players_info.items())
-        file.close()
-        loadLine(-1)
-
-        # read the last move
-
-
-def loadLine(line2read):
-    file = open(game_loaded, 'r')
-    line = file.read().splitlines()
-    move = line[line2read]
-    player_info = line[1]
-
-    count = 0
-    while count >= 0:
-        count = move.find('player', count + 1)
-        if count != -1:
-            plr_num = move[count + 6]
-
-            plr_coord_x_start = move.find("X", count)+2
-            plr_coord_x_end = move.find(" ", plr_coord_x_start)
-            plr_coord_x = move[plr_coord_x_start:plr_coord_x_end]
-
-            plr_coord_y_start = move.find("Y", count)+2
-            plr_coord_y_end = move.find(" ", plr_coord_y_start)
-            plr_coord_y = move[plr_coord_y_start:plr_coord_y_end]
-            print(f"x coord: {plr_coord_x} and y coord: {plr_coord_y}")
-
-            plr_coord = [plr_coord_x, plr_coord_y]
-            players_info.get('player' + plr_num).update({'coords': plr_coord})
-
-            plr_direction_loction_start = move.find("D:", count)+2
-            plr_direction_loction_end = move.find(" " or "<", plr_direction_loction_start)
-            plr_direction = move[plr_direction_loction_start:plr_direction_loction_end]
-            players_info.get('player' + plr_num).update({'direction': plr_direction})
-
-            print(players_info.get('player' + plr_num).values())
-            print(players_info)
-
-    file.close()
-
-
-def navigate():
-    global line2read
-    printOnScreen = False
-    userInput = waitForInput(printOnScreen)
-
-    if userInput == 'up':
-        line2read = line2read - 1
-        loadLine(line2read)
-    elif userInput == 'down':
-        line2read = line2read + 1
-        loadLine(line2read)
-
-
-
 def draw_to_board():
-    gameDisplay.blit(gameBoard_in_use, (0, 0))
+    gameDisplay.blit(gameBoard_in_use, gameboard_starting_location)
 
     for index in range(number_of_players):
-        player = players_info.get('player' + str(index + 1)).get('name')
-        robot = players_info.get('player' + str(index + 1)).get('robot')
+        robot = players_info[index]["robot"]
         robot_name = robot + '.png'
         robot_actual = pygame.image.load('Script/Images/Robots/' + robot_name)
         robot_actual = pygame.transform.smoothscale(robot_actual, (robotSize))
-        coords = players_info.get('player' + str(index + 1)).get('coords')
+        
+        coords = players_info[index]["coords"]
         coords_x = (int(coords[0]) - 1) * squareSizeX
         coords_y = (int(coords[1]) - 1) * squareSizeY
-        direction = players_info.get('player' + str(index + 1)).get('direction')
-        if direction == 'north':
-            robot_actual = pygame.transform.rotate(robot_actual, 0)
-        elif direction == 'east':
-            robot_actual = pygame.transform.rotate(robot_actual, 90)
-        elif direction == 'south':
-            robot_actual = pygame.transform.rotate(robot_actual, 180)
-        elif direction == 'west':
-            robot_actual = pygame.transform.rotate(robot_actual, 270)
+        
+        direct = players_info[index]["direction"]
+        robot_actual = pygame.transform.rotate(robot_actual, NESW.get(direct))
 
         gameDisplay.blit(robot_actual, (coords_x, coords_y))
     pygame.display.update()
@@ -260,12 +199,7 @@ def draw_to_board():
 
 
 def mainMenu():
-    message = """
-    1. Load a Game \n
-    2. Start a new game \n 
-    3. make Json
-    4. load Json
-    """
+    message = ">1. Load a Game >2. Start a new game >3. make Json"
     message_location = ((display_width / 2), (display_height / 2))
     message_display(message, message_location, black)
     printOnScreen = True
@@ -274,7 +208,7 @@ def mainMenu():
 
     if userInput == '1':
         # TODO: make this go and load a game
-        loadGame()
+        loadJson()
 
     elif userInput == '2':
         message_display(message, message_location, white)
@@ -284,11 +218,8 @@ def mainMenu():
         # make json
         makeJson()
 
-    elif userInput == '4':
-        loadJson()
-    
     else:
-        """do nothing"""
+        return False
     
     return True
 
@@ -299,11 +230,6 @@ def gameLoop(mainMenuIsLoaded):
     gameExit = False
 
     while not gameExit:
-        # check for quit
-        # Load the game if not loaded
-        #   draw board loaded
-        # navigate
-        #   draw board loaded
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -315,9 +241,10 @@ def gameLoop(mainMenuIsLoaded):
             mainMenuIsLoaded = mainMenu()
 
         else:
+            gameDisplay.blit(gameBackground,(0,0))
+            pygame.display.update()
+            draw_to_board()
             navigate()
-
-        draw_to_board()
         
 
         pygame.display.update()

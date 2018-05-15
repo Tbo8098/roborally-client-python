@@ -1,7 +1,0 @@
-BasicBoard.png
-tyler curtis joe<
-
-start
->player1 X:12 Y:1 D:north player2 X:12 Y:12 D:south player3 X:9 Y:4 D:west<
->player1 X:7 Y:8 D:north player2 X:12 Y:5 D:south player3 X:4 Y:4 D:west<
->player1 X:12 Y:1 D:north player2 X:5 Y:5 D:south player3 X:3 Y:10 D:west<
